@@ -174,7 +174,7 @@
   }
   .col-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 6px; position: relative; }
   .col-value { font-size: 11.5px; color: var(--navy-800); font-variant-numeric: tabular-nums; font-weight: 700; }
-  .col-bar { width: 100%; max-width: 32px; border-radius: 7px 7px 0 0; background: linear-gradient(180deg, var(--navy-500), var(--navy-700)); transition: opacity .12s, transform .12s; cursor: default; }
+  .col-bar { width: 100%; max-width: 32px; border-radius: 7px 7px 0 0; background: linear-gradient(180deg, var(--gray-500), var(--gray-700)); transition: opacity .12s, transform .12s; cursor: default; }
   .col-item:hover .col-bar { opacity: 0.88; transform: scaleY(1.01); }
   .col-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; height: 28px; display:flex; align-items:flex-start; justify-content:center; font-weight: 550; }
 
@@ -459,12 +459,15 @@ function monthlyAgg(){
 function renderColumnChart(containerId, agg, key){
   const el = document.getElementById(containerId);
   const max = Math.max(...MONTHS.map(m => agg[m][key]), 1);
-  el.innerHTML = MONTHS.map(name => {
+  el.innerHTML = MONTHS.map((name, i) => {
     const val = agg[name][key];
     const h = Math.max((val/max)*100, val>0?4:0);
+    const fill = i % 2 === 0
+      ? 'linear-gradient(180deg, var(--navy-500), var(--navy-700))'
+      : 'linear-gradient(180deg, var(--gray-500), var(--gray-700))';
     return `<div class="col-item" title="${name}: ${fmt(val)}">
       <div class="col-value">${val>0?fmt(val):''}</div>
-      <div class="col-bar" style="height:${h}%;"></div>
+      <div class="col-bar" style="height:${h}%; background:${fill};"></div>
       <div class="col-label">${name}</div>
     </div>`;
   }).join('');
@@ -602,7 +605,7 @@ function generatePDF(DATA){
   doc.addFont('Roboto-Bold.ttf', 'Roboto', 'bold');
   doc.setFont('Roboto', 'normal');
   const pageW = 210, marginX = 14;
-  const wine = [117,29,64], raspberry = [155,36,84], gray = [154,154,154], ink = [36,17,25];
+  const wine = [117,29,64], raspberry = [155,36,84], gray = [154,154,154], graybar = [107,107,107], ink = [36,17,25];
   let y = 0;
 
   const total = DATA.length;
@@ -691,7 +694,7 @@ function generatePDF(DATA){
       const h = (val / axisMax) * chartH;
       const x = chartLeft + i * barW + barW*0.18;
       const w = barW * 0.64;
-      doc.setFillColor(...color);
+      doc.setFillColor(...(i % 2 === 0 ? wine : graybar));
       doc.rect(x, chartTop + chartH - h, w, Math.max(h,0.3), 'F');
       doc.setFontSize(7); doc.setTextColor(...ink); doc.setFont('Roboto','bold');
       doc.text(fmt(val), x + w/2, chartTop + chartH - h - 1.8, { align: 'center' });
@@ -700,8 +703,8 @@ function generatePDF(DATA){
     });
     return chartTop + chartH + 9;
   }
-  y = drawBarChart('Aylık Eğitim Sayısı (Adet)', 'egitim', y, wine);
-  y = drawBarChart('Aylık Katılımcı Sayısı (Kişi)', 'katilan', y + 2, wine);
+  y = drawBarChart('Aylık Eğitim Sayısı (Adet)', 'egitim', y, graybar);
+  y = drawBarChart('Aylık Katılımcı Sayısı (Kişi)', 'katilan', y + 2, graybar);
 
   // Tip / Durum comparison bars
   function groupBy(key){
