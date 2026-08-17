@@ -16,9 +16,16 @@
     --gold-500: #b52d60;
     --gold-300: #d97fa0;
     --gold-100: #fbeaf0;
+    --gray-900: #3a3a3a;
+    --gray-700: #6b6b6b;
+    --gray-500: #9a9a9a;
+    --gray-200: #e2e2e2;
+    --gray-100: #ececec;
+    --gray-50:  #f5f5f5;
     --surface:      #ffffff;
-    --surface-page: #f7f6f6;
-    --surface-sunken: #f1eeef;
+    --surface-tile: #f6f5f5;
+    --surface-page: #ececec;
+    --surface-sunken: #e2e0e0;
     --text-primary:   #241119;
     --text-secondary: #625a5d;
     --text-muted:     #9a9a9a;
@@ -114,7 +121,7 @@
     margin-top: 8px;
   }
   .kpi-tile {
-    background: var(--surface);
+    background: var(--surface-tile);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     padding: 18px 20px;
@@ -183,6 +190,14 @@
   .cmp-block { display: flex; flex-direction: column; gap: 10px; }
   .cmp-title { font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
   .cmp-row { display: grid; grid-template-columns: 82px 1fr 42px; align-items: center; gap: 8px; }
+  .cmp-row.stacked {
+    grid-template-columns: 1fr auto;
+    grid-template-areas: "label label" "track val";
+    row-gap: 6px; margin-bottom: 4px;
+  }
+  .cmp-row.stacked .cmp-label { grid-area: label; }
+  .cmp-row.stacked .cmp-track { grid-area: track; }
+  .cmp-row.stacked .cmp-val { grid-area: val; }
   .cmp-label { font-size: 12px; color: var(--text-secondary); font-weight: 600; }
   .cmp-track { height: 17px; background: var(--surface-sunken); border-radius: 6px; overflow: hidden; }
   .cmp-fill { height: 100%; border-radius: 6px; }
@@ -224,22 +239,22 @@
   table { width: 100%; border-collapse: collapse; font-size: 12.5px; background: var(--surface); min-width: 880px; }
   thead th {
     position: sticky; top: 0;
-    background: var(--navy-700); text-align: left; padding: 11px 12px;
-    font-weight: 650; color: var(--text-on-navy); border-bottom: 1px solid var(--border);
+    background: var(--gray-100); text-align: left; padding: 11px 12px;
+    font-weight: 700; color: var(--navy-700); border-bottom: 2px solid var(--navy-700);
     white-space: nowrap; cursor: pointer; user-select: none;
   }
-  thead th:hover { background: var(--navy-600); }
-  thead th .arrow { font-size: 10px; color: var(--gold-300); margin-left: 3px; }
+  thead th:hover { background: var(--gray-200); }
+  thead th .arrow { font-size: 10px; color: var(--gold-600); margin-left: 3px; }
   tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
   tbody tr:last-child td { border-bottom: none; }
-  tbody tr:hover { background: var(--navy-50); }
+  tbody tr:hover { background: var(--gray-50); }
   td.num { text-align: right; font-variant-numeric: tabular-nums; }
   td.name-cell { max-width: 340px; }
 
   .badge {
     display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 700;
   }
-  .badge-planli { background: var(--navy-100); color: var(--navy-700); }
+  .badge-planli { background: var(--gray-100); color: var(--gray-700); }
   .badge-yeni { background: var(--gold-100); color: var(--gold-700); }
   .badge-online { color: var(--navy-700); font-weight: 700; }
   .badge-sinif { color: var(--gold-700); font-weight: 700; }
@@ -308,11 +323,11 @@
     </div>
     <div class="grid-2">
       <div class="card">
-        <div class="card-title">Eğitim Sayısı</div>
+        <div class="card-title">Eğitim Sayısı <span class="muted">(Adet)</span></div>
         <div class="col-chart" id="chartMonthlyCount"></div>
       </div>
       <div class="card">
-        <div class="card-title">Katılımcı Sayısı</div>
+        <div class="card-title">Katılımcı Sayısı <span class="muted">(Kişi)</span></div>
         <div class="col-chart" id="chartMonthlyPart"></div>
       </div>
     </div>
@@ -410,10 +425,10 @@ function renderDashboard(DATA) {
   const gunToplam = DATA.reduce((s,d) => s + (d.gun||0), 0);
 
   const kpis = [
-    { icon:'book', gold:false, label:'Toplam Eğitim', value: fmt(total), unit:'', foot: (total-yeni)+' planlı · '+yeni+' yeni eklenen' },
-    { icon:'spark', gold:true, label:'Yeni Eğitim', value: fmt(yeni), unit:'', foot: Math.round(yeni/total*100)+'% toplam içinde' },
+    { icon:'book', gold:false, label:'Toplam Eğitim Sayısı', value: fmt(total), unit:'', foot: (total-yeni)+' planlı · '+yeni+' yeni eklenen' },
+    { icon:'spark', gold:true, label:'Yeni Eğitim Sayısı', value: fmt(yeni), unit:'', foot: Math.round(yeni/total*100)+'% toplam içinde' },
     { icon:'users', gold:false, label:'Toplam Katılımcı', value: fmt(katilan), unit:'kişi', foot: fmt(Math.round(katilan/total))+' ort. / eğitim' },
-    { icon:'cert', gold:false, label:'Toplam Sertifika', value: fmt(sertifika), unit:'adet', foot: 'Katılımcı başı 1 sertifika' },
+    { icon:'cert', gold:false, label:'Sertifika Sayısı', value: fmt(sertifika), unit:'adet', foot: 'Katılımcı başı 1 sertifika' },
     { icon:'star', gold:true, label:'Ort. Değerlendirme', value: avgPuan.toFixed(2), unit:'/ 5', foot: puanlar.length+' eğitimde anket verisi var' },
     { icon:'clock', gold:false, label:'Toplam Eğitim Günü', value: fmt(gunToplam), unit:'gün', foot: (gunToplam/total).toFixed(1)+' gün ort. süre' },
   ];
@@ -474,12 +489,13 @@ function renderLegend(containerId, items){
     `<div class="legend-item"><span class="legend-dot" style="background:${i.color}"></span>${i.label}</div>`
   ).join('');
 }
-function renderCmp(containerId, rows, key, colorMap){
+function renderCmp(containerId, rows, key, colorMap, stacked){
   const max = Math.max(...rows.map(r => r[key]), 1);
   document.getElementById(containerId).innerHTML = rows.map(r => {
     const pct = Math.max((r[key]/max)*100, 3);
-    return `<div class="cmp-row">
-      <div class="cmp-label">${r.label}</div>
+    const text = r.displayLabel || r.label;
+    return `<div class="cmp-row${stacked ? ' stacked' : ''}">
+      <div class="cmp-label">${text}</div>
       <div class="cmp-track"><div class="cmp-fill" style="width:${pct}%; background:${colorMap[r.label]};"></div></div>
       <div class="cmp-val">${fmt(r[key])}</div>
     </div>`;
@@ -497,12 +513,12 @@ renderCmp('cmpTipCount', tipRows, 'egitim', tipColors);
 
 const durumAgg = groupBy('durum');
 const durumRows = [
-  { label:'PLANLI', egitim: durumAgg['PLANLI'].egitim, katilan: durumAgg['PLANLI'].katilan },
-  { label:'YENİ', egitim: durumAgg['YENİ'].egitim, katilan: durumAgg['YENİ'].katilan },
+  { label:'PLANLI', displayLabel:'2026 Takvimde Yer Alan Eğitim Sayısı', egitim: durumAgg['PLANLI'].egitim, katilan: durumAgg['PLANLI'].katilan },
+  { label:'YENİ', displayLabel:'2026 Yeni Açılan Eğitim Sayısı', egitim: durumAgg['YENİ'].egitim, katilan: durumAgg['YENİ'].katilan },
 ];
 const durumColors = { 'PLANLI': token('--navy-700'), 'YENİ': token('--gold-600') };
-renderLegend('legendDurum', [{label:'Planlı', color:token('--navy-700')},{label:'Yeni', color:token('--gold-600')}]);
-renderCmp('cmpDurumCount', durumRows, 'egitim', durumColors);
+renderLegend('legendDurum', [{label:'2026 Takvimde Yer Alan', color:token('--navy-700')},{label:'2026 Yeni Açılan', color:token('--gold-600')}]);
+renderCmp('cmpDurumCount', durumRows, 'egitim', durumColors, true);
 
 // ---------- Top 10 katılım ----------
 (function(){
@@ -613,10 +629,10 @@ function generatePDF(DATA){
 
   // KPI grid (3 x 2)
   const kpis = [
-    ['Toplam Eğitim', fmt(total)],
-    ['Yeni Eğitim', fmt(yeni)],
+    ['Toplam Eğitim Sayısı', fmt(total)],
+    ['Yeni Eğitim Sayısı', fmt(yeni)],
     ['Toplam Katılımcı', fmt(katilan)],
-    ['Toplam Sertifika', fmt(sertifika)],
+    ['Sertifika Sayısı', fmt(sertifika)],
     ['Ort. Değerlendirme', avgPuan.toFixed(2) + ' / 5'],
     ['Toplam Eğitim Günü', fmt(gunToplam)],
   ];
@@ -684,8 +700,8 @@ function generatePDF(DATA){
     });
     return chartTop + chartH + 9;
   }
-  y = drawBarChart('Aylık Eğitim Sayısı', 'egitim', y, wine);
-  y = drawBarChart('Aylık Katılımcı Sayısı', 'katilan', y + 2, wine);
+  y = drawBarChart('Aylık Eğitim Sayısı (Adet)', 'egitim', y, wine);
+  y = drawBarChart('Aylık Katılımcı Sayısı (Kişi)', 'katilan', y + 2, wine);
 
   // Tip / Durum comparison bars
   function groupBy(key){
@@ -704,6 +720,17 @@ function generatePDF(DATA){
     doc.setFont('Roboto','bold'); doc.setFontSize(7.5);
     doc.text(String(value), x + w - 6, rowY + 3.2, { align: 'right' });
   }
+  function drawCompareRowStacked(label, value, x, w, rowY, max, color){
+    doc.setFontSize(7); doc.setTextColor(...ink); doc.setFont('Roboto','normal');
+    doc.text(label, x, rowY);
+    const trackY = rowY + 1.8, trackW = w - 12;
+    doc.setFillColor(241,238,239);
+    doc.rect(x, trackY, trackW, 4.2, 'F');
+    doc.setFillColor(...color);
+    doc.rect(x, trackY, Math.max((value/max)*trackW, 2), 4.2, 'F');
+    doc.setFont('Roboto','bold'); doc.setFontSize(7.5);
+    doc.text(String(value), x + w - 4, trackY + 3.2, { align: 'right' });
+  }
   const tipAgg = groupBy('tip'), durumAgg = groupBy('durum');
   const halfW = (pageW - marginX*2 - 8) / 2;
   doc.setFont('Roboto','bold'); doc.setFontSize(9.5); doc.setTextColor(...ink);
@@ -713,8 +740,8 @@ function generatePDF(DATA){
   const durumMax = Math.max(durumAgg['PLANLI']?.egitim||0, durumAgg['YENİ']?.egitim||0, 1);
   drawCompareRow('Çevrim İçi', tipAgg['ÇEVRİM İÇİ']?.egitim||0, marginX, halfW, y + 8, tipMax, wine);
   drawCompareRow('Sınıf İçi', tipAgg['SINIF İÇİ']?.egitim||0, marginX, halfW, y + 14, tipMax, raspberry);
-  drawCompareRow('Planlı', durumAgg['PLANLI']?.egitim||0, marginX + halfW + 8, halfW, y + 8, durumMax, wine);
-  drawCompareRow('Yeni', durumAgg['YENİ']?.egitim||0, marginX + halfW + 8, halfW, y + 14, durumMax, raspberry);
+  drawCompareRowStacked('2026 Takvimde Yer Alan Eğitim Sayısı', durumAgg['PLANLI']?.egitim||0, marginX + halfW + 8, halfW, y + 7, durumMax, wine);
+  drawCompareRowStacked('2026 Yeni Açılan Eğitim Sayısı', durumAgg['YENİ']?.egitim||0, marginX + halfW + 8, halfW, y + 17, durumMax, raspberry);
 
   // Detail table (new page)
   doc.addPage();
