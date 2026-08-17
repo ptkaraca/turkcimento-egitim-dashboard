@@ -610,6 +610,7 @@ async function generatePDF(){
   try {
     const scale = Math.min(2, (window.devicePixelRatio || 1) + 0.5);
     let breakPointsCss = [];
+    let tableSectionTopCss = null;
     const canvas = await html2canvas(document.body, {
       scale,
       backgroundColor: getComputedStyle(document.body).backgroundColor || '#ececec',
@@ -619,6 +620,20 @@ async function generatePDF(){
         clonedDoc.querySelector('.table-controls')?.remove();
         clonedDoc.getElementById('resultCount')?.remove();
         clonedDoc.querySelectorAll('#dataTable thead th .arrow').forEach(a => a.remove());
+
+        // tighten the table just for the PDF export so the full list fits in fewer
+        // pages — the on-screen table is untouched.
+        const style = clonedDoc.createElement('style');
+        style.textContent = `
+          #dataTable thead th { padding: 6px 12px !important; }
+          #dataTable tbody td { padding: 5px 12px !important; }
+          .wrap { gap: 58px !important; }
+        `;
+        clonedDoc.head.appendChild(style);
+
+        // the "Tüm Eğitimler" table always starts at the top of a fresh page.
+        const tableSection = clonedDoc.getElementById('dataTable')?.closest('section');
+        if (tableSection) tableSectionTopCss = Math.round(tableSection.getBoundingClientRect().top);
 
         // collect safe cut lines (top/bottom edges of cards, sections, table rows)
         // so page breaks never slice through the middle of one of these.
@@ -642,12 +657,21 @@ async function generatePDF(){
     const breakPointsPx = breakPointsCss
       .map(v => v * scale)
       .filter(v => v >= 0 && v <= canvas.height);
+    const tableSectionTopPx = tableSectionTopCss != null ? tableSectionTopCss * scale : null;
 
     let cursor = 0;
     let first = true;
+    let forcedTableBreakDone = false;
     while (cursor < canvas.height - 1) {
       const idealEnd = cursor + targetPageH;
       let cut = idealEnd >= canvas.height ? canvas.height : null;
+      // force the table onto its own fresh page, once, the first time it would
+      // otherwise start mid-page.
+      if (!forcedTableBreakDone && tableSectionTopPx != null &&
+          tableSectionTopPx > cursor && tableSectionTopPx <= idealEnd) {
+        cut = Math.round(tableSectionTopPx);
+        forcedTableBreakDone = true;
+      }
       if (cut === null) {
         for (const bp of breakPointsPx) {
           if (bp > cursor + targetPageH * 0.4 && bp <= idealEnd) cut = bp;
