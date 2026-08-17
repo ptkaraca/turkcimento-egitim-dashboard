@@ -1,0 +1,794 @@
+<meta charset="utf-8">
+<title>TürkÇimento Akademi | Eğitim Dashboard</title>
+<style>
+  :root {
+    color-scheme: light;
+    /* TürkÇimento Akademi brand: bordo rgb(117,29,64), pembe-mor rgb(155,36,84), gri rgb(154,154,154) */
+    --navy-900: #3d0f21;
+    --navy-800: #5a1730;
+    --navy-700: #751d40;
+    --navy-600: #8b2249;
+    --navy-500: #9b2454;
+    --navy-100: #f3e1e8;
+    --navy-50:  #faf3f5;
+    --gold-700: #7a1b41;
+    --gold-600: #9b2454;
+    --gold-500: #b52d60;
+    --gold-300: #d97fa0;
+    --gold-100: #fbeaf0;
+    --surface:      #ffffff;
+    --surface-page: #f7f6f6;
+    --surface-sunken: #f1eeef;
+    --text-primary:   #241119;
+    --text-secondary: #625a5d;
+    --text-muted:     #9a9a9a;
+    --text-on-navy:   #ffffff;
+    --text-on-navy-muted: #e3c3d0;
+    --border:         rgba(154,154,154,0.28);
+    --border-strong:  rgba(154,154,154,0.42);
+    --series-1: var(--navy-700);
+    --series-1-soft: var(--navy-100);
+    --series-2: var(--gold-600);
+    --series-2-soft: var(--gold-100);
+    --good:    #0ca30c;
+    --good-bg: #e5f6e5;
+    --warn:    #b45400;
+    --warn-bg: #fdeee0;
+    --shadow-sm: 0 1px 2px rgba(36,17,25,0.07);
+    --shadow-md: 0 6px 20px rgba(117,29,64,0.10), 0 1px 3px rgba(117,29,64,0.08);
+    --shadow-lg: 0 16px 40px rgba(117,29,64,0.18);
+    --radius: 16px;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    background: var(--surface-page);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  body { padding: 0 0 72px; }
+
+  .wrap { max-width: 1320px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 40px); display: flex; flex-direction: column; gap: 28px; }
+
+  /* ---------------- Hero ---------------- */
+  .hero {
+    background:
+      radial-gradient(1100px 420px at 12% -10%, rgba(155,36,84,0.30), transparent 60%),
+      linear-gradient(120deg, var(--navy-900) 0%, var(--navy-700) 55%, var(--navy-600) 100%);
+    color: var(--text-on-navy);
+    padding: 30px clamp(16px, 4vw, 40px) 34px;
+    margin-bottom: 4px;
+  }
+  .hero-inner { max-width: 1320px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+  .brand-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+  .brand-mark { display: flex; align-items: center; gap: 10px; }
+  .brand-badge {
+    width: 34px; height: 34px; border-radius: 9px;
+    background: linear-gradient(145deg, var(--navy-500), var(--navy-700));
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 15px; color: #ffffff;
+    box-shadow: var(--shadow-sm);
+  }
+  .brand-name { font-size: 13.5px; font-weight: 700; letter-spacing: 0.02em; }
+  .brand-name .sub { display: block; font-size: 10.5px; font-weight: 500; color: var(--text-on-navy-muted); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 1px; }
+  .hero-badge {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+    color: #ffffff; background: var(--gold-600);
+    padding: 5px 12px; border-radius: 999px;
+  }
+  .btn-pdf {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-family: inherit; font-size: 12.5px; font-weight: 700; letter-spacing: 0.01em;
+    color: #ffffff; background: var(--gold-600);
+    padding: 8px 15px; border-radius: 999px; border: none; cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: background .15s ease, transform .15s ease;
+  }
+  .btn-pdf:hover { background: var(--navy-700); transform: translateY(-1px); }
+  .btn-pdf:active { transform: translateY(0); }
+  .btn-pdf svg { width: 15px; height: 15px; flex: none; }
+  .hero-title-row { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+  h1 { font-size: clamp(26px, 3.4vw, 38px); font-weight: 800; margin: 0; letter-spacing: -0.02em; text-wrap: balance; }
+  .hero-sub { color: var(--text-on-navy-muted); font-size: 14px; margin: 6px 0 0; max-width: 60ch; }
+  .hero-meta { text-align: right; font-size: 12px; color: var(--text-on-navy-muted); line-height: 1.5; }
+  .hero-meta strong { color: var(--text-on-navy); font-weight: 650; }
+
+  /* ---------------- Sections ---------------- */
+  section { display: flex; flex-direction: column; gap: 14px; }
+  .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--navy-700);
+  }
+  .eyebrow::before { content: ""; width: 16px; height: 3px; border-radius: 2px; background: var(--gold-500); }
+  h2 { font-size: 19px; font-weight: 750; margin: 2px 0 0; letter-spacing: -0.01em; }
+  .section-note { color: var(--text-muted); font-size: 12.5px; }
+
+  /* ---------------- KPI row ---------------- */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 14px;
+    margin-top: 8px;
+  }
+  .kpi-tile {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: transform .18s ease, box-shadow .18s ease;
+  }
+  .kpi-tile:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+  .kpi-top { display: flex; align-items: center; justify-content: space-between; }
+  .kpi-label { font-size: 11.5px; color: var(--text-secondary); font-weight: 650; letter-spacing: 0.01em; }
+  .kpi-icon {
+    width: 26px; height: 26px; border-radius: 8px; flex: none;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--series-1-soft); color: var(--navy-700);
+  }
+  .kpi-icon.gold { background: var(--series-2-soft); color: var(--gold-700); }
+  .kpi-icon svg { width: 14px; height: 14px; }
+  .kpi-value { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; line-height: 1; color: var(--navy-800); }
+  .kpi-value .unit { font-size: 14px; font-weight: 650; color: var(--text-secondary); margin-left: 3px; }
+  .kpi-foot { font-size: 11.5px; color: var(--text-muted); }
+
+  /* ---------------- Cards / grid ---------------- */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 780px) { .grid-2 { grid-template-columns: 1fr; } .kpi-row { margin-top: -32px; } }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 22px 22px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .card-title { font-size: 13.5px; font-weight: 700; color: var(--text-primary); }
+  .card-title .muted { font-weight: 500; color: var(--text-muted); }
+
+  /* ---------------- Legend ---------------- */
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); font-weight: 550; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+
+  /* ---------------- Column chart (vertical) ---------------- */
+  .col-chart { display: flex; align-items: flex-end; gap: 10px; height: 170px; padding-top: 22px; position: relative; }
+  .col-chart::before {
+    content: ""; position: absolute; left: 0; right: 0; bottom: 28px; height: 1px; background: var(--border-strong);
+  }
+  .col-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 6px; position: relative; }
+  .col-value { font-size: 11.5px; color: var(--navy-800); font-variant-numeric: tabular-nums; font-weight: 700; }
+  .col-bar { width: 100%; max-width: 32px; border-radius: 7px 7px 0 0; background: linear-gradient(180deg, var(--navy-500), var(--navy-700)); transition: opacity .12s, transform .12s; cursor: default; }
+  .col-item:hover .col-bar { opacity: 0.88; transform: scaleY(1.01); }
+  .col-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; height: 28px; display:flex; align-items:flex-start; justify-content:center; font-weight: 550; }
+
+  /* ---------------- Horizontal bar chart ---------------- */
+  .hbar-list { display: flex; flex-direction: column; gap: 10px; }
+  .hbar-row { display: grid; grid-template-columns: minmax(90px,190px) 1fr auto; align-items: center; gap: 10px; }
+  .hbar-name { font-size: 12px; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 550; }
+  .hbar-track { position: relative; height: 20px; background: var(--surface-sunken); border-radius: 6px; overflow: hidden; }
+  .hbar-fill { height: 100%; border-radius: 6px 3px 3px 6px; background: linear-gradient(90deg, var(--navy-600), var(--navy-700)); }
+  .hbar-val { font-size: 12px; font-weight: 700; color: var(--navy-800); font-variant-numeric: tabular-nums; min-width: 36px; text-align: right; }
+
+  /* ---------------- Compare bars (2-series mini) ---------------- */
+  .cmp-block { display: flex; flex-direction: column; gap: 10px; }
+  .cmp-title { font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+  .cmp-row { display: grid; grid-template-columns: 82px 1fr 42px; align-items: center; gap: 8px; }
+  .cmp-label { font-size: 12px; color: var(--text-secondary); font-weight: 600; }
+  .cmp-track { height: 17px; background: var(--surface-sunken); border-radius: 6px; overflow: hidden; }
+  .cmp-fill { height: 100%; border-radius: 6px; }
+  .cmp-val { font-size: 12px; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; color: var(--navy-800); }
+
+  /* ---------------- Bullet rows (beklenen vs gerçekleşen) ---------------- */
+  .bullet-wrap { max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 4px; }
+  .bullet-row { display: grid; grid-template-columns: minmax(120px,250px) 1fr 76px; align-items: center; gap: 10px; }
+  .bullet-name { font-size: 12px; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 550; }
+  .bullet-track { position: relative; height: 20px; background: var(--surface-sunken); border-radius: 6px; }
+  .bullet-actual { position: absolute; left: 0; top: 0; height: 20px; border-radius: 6px; background: linear-gradient(90deg, var(--navy-600), var(--navy-700)); }
+  .bullet-actual.over { background: linear-gradient(90deg, #1f8f1f, var(--good)); }
+  .bullet-target { position: absolute; top: -2px; width: 3px; height: 24px; border-radius: 1px; background: var(--gold-600); z-index: 2; box-shadow: 0 0 0 1px rgba(255,255,255,0.9); }
+  .bullet-meta { font-size: 11px; font-variant-numeric: tabular-nums; text-align: right; font-weight: 700; }
+  .bullet-meta .up { color: var(--good); }
+  .bullet-meta .down { color: var(--warn); }
+
+  /* ---------------- Rating meters ---------------- */
+  .meter-list { display: flex; flex-direction: column; gap: 10px; }
+  .meter-row { display: grid; grid-template-columns: minmax(120px,1fr) 130px 42px; align-items: center; gap: 10px; }
+  .meter-name { font-size: 12px; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 550; }
+  .meter-track { height: 9px; border-radius: 5px; background: var(--series-2-soft); overflow: hidden; }
+  .meter-fill { height: 100%; border-radius: 5px; background: linear-gradient(90deg, var(--gold-500), var(--gold-600)); }
+  .meter-val { font-size: 12px; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; color: var(--navy-800); }
+
+  /* ---------------- Table ---------------- */
+  .table-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .search-input {
+    flex: 1; min-width: 220px; max-width: 360px;
+    background: var(--surface-sunken); border: 1px solid var(--border-strong); border-radius: 10px;
+    padding: 10px 14px; font-size: 13px; color: var(--text-primary);
+    font-family: inherit;
+  }
+  .search-input:focus { outline: 2px solid var(--gold-500); outline-offset: 1px; border-color: transparent; }
+  .search-input::placeholder { color: var(--text-muted); }
+  .result-count { font-size: 12px; color: var(--text-muted); font-weight: 550; }
+
+  .table-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; background: var(--surface); min-width: 880px; }
+  thead th {
+    position: sticky; top: 0;
+    background: var(--navy-700); text-align: left; padding: 11px 12px;
+    font-weight: 650; color: var(--text-on-navy); border-bottom: 1px solid var(--border);
+    white-space: nowrap; cursor: pointer; user-select: none;
+  }
+  thead th:hover { background: var(--navy-600); }
+  thead th .arrow { font-size: 10px; color: var(--gold-300); margin-left: 3px; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: var(--navy-50); }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  td.name-cell { max-width: 340px; }
+
+  .badge {
+    display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 700;
+  }
+  .badge-planli { background: var(--navy-100); color: var(--navy-700); }
+  .badge-yeni { background: var(--gold-100); color: var(--gold-700); }
+  .badge-online { color: var(--navy-700); font-weight: 700; }
+  .badge-sinif { color: var(--gold-700); font-weight: 700; }
+  .badge-tip { font-size: 11.5px; }
+
+  footer.page-foot { color: var(--text-muted); font-size: 11.5px; text-align: center; padding-top: 8px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+
+  /* ---------------- Print / PDF ---------------- */
+  @media print {
+    @page { size: A4; margin: 12mm; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; transition: none !important; }
+    html, body { background: #fff; padding: 0; }
+    .btn-pdf, .search-input, thead th .arrow { display: none !important; }
+    thead th { cursor: default; }
+    .hero { border-radius: 0; }
+    .kpi-tile:hover { transform: none; box-shadow: var(--shadow-sm); }
+    .kpi-tile, .card { box-shadow: none; border: 1px solid #d7d9ea; break-inside: avoid; }
+    section { break-inside: avoid; }
+    .kpi-row { break-inside: avoid; }
+    .table-scroll { border: 1px solid #d7d9ea; overflow: visible; }
+    table { min-width: 0; font-size: 10.5px; }
+    thead th { position: static; }
+    tbody tr:hover { background: transparent; }
+    .wrap { gap: 16px; }
+  }
+</style>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="brand-row">
+      <div class="brand-mark">
+        <div class="brand-badge">TÇ</div>
+        <div class="brand-name">TürkÇimento Akademi</div>
+      </div>
+      <button class="btn-pdf" id="pdfBtn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+        PDF İndir
+      </button>
+    </div>
+    <div class="hero-title-row">
+      <div>
+        <h1>Eğitim Dashboard</h1>
+        <p class="hero-sub">Ocak – Temmuz 2026 döneminde gerçekleştirilen 46 eğitim faaliyetinin katılım, sertifika ve değerlendirme verileri.</p>
+      </div>
+      <div class="hero-meta">Kaynak: Eğitim takip tablosu<br><strong>Son güncelleme:</strong> Ağustos 2026</div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <section id="kpis">
+    <div class="kpi-row" id="kpiRow"></div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <div>
+        <h2>Aylık Trend</h2>
+      </div>
+      <span class="section-note">Ocak–Temmuz 2026, aya göre</span>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Eğitim Sayısı</div>
+        <div class="col-chart" id="chartMonthlyCount"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Katılımcı Sayısı</div>
+        <div class="col-chart" id="chartMonthlyPart"></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <div>
+        <h2>Eğitim Tipi</h2>
+      </div>
+    </div>
+    <div class="card">
+      <div class="legend" id="legendTip"></div>
+      <div id="cmpTipCount"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <div>
+        <h2>Eğitim Durumu</h2>
+      </div>
+    </div>
+    <div class="card">
+      <div class="legend" id="legendDurum"></div>
+      <div id="cmpDurumCount"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="card">
+      <div class="card-title">En Çok Katılım Alan 10 Eğitim</div>
+      <div class="hbar-list" id="chartTop10"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <div>
+        <h2>Tüm Eğitimler</h2>
+      </div>
+      <span class="result-count" id="resultCount"></span>
+    </div>
+    <div class="table-controls">
+      <input class="search-input" id="searchInput" type="text" placeholder="Eğitim adı, durum, tip veya tarihe göre ara…">
+    </div>
+    <div class="table-scroll">
+      <table id="dataTable">
+        <thead>
+          <tr>
+            <th data-key="durum">Durum</th>
+            <th data-key="ad">Eğitim Adı</th>
+            <th data-key="tarih">Tarih</th>
+            <th data-key="tip">Tip</th>
+            <th data-key="gun" class="num">Gün</th>
+            <th data-key="puan" class="num">Puan</th>
+            <th data-key="katilan" class="num">Katılan</th>
+            <th data-key="sertifika" class="num">Sertifika</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer class="page-foot">TürkÇimento Akademi · Ocak–Temmuz 2026 eğitim faaliyetleri</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/4.2.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/5.0.8/jspdf.plugin.autotable.min.js"></script>
+<script>
+const MONTHS = ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz"];
+function token(name){ return `var(${name})`; }
+const fmt = n => n.toLocaleString('tr-TR');
+
+const ICONS = {
+  book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>',
+  spark: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8L12 2z"/></svg>',
+  users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  cert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.5 13.5 17 22l-5-3-5 3 1.5-8.5"/></svg>',
+  star: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>',
+  clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>',
+};
+
+function renderDashboard(DATA) {
+
+// ---------- KPIs ----------
+(function renderKPIs(){
+  const total = DATA.length;
+  const yeni = DATA.filter(d => d.durum === 'YENİ').length;
+  const katilan = DATA.reduce((s,d) => s + (d.katilan||0), 0);
+  const sertifika = DATA.reduce((s,d) => s + (d.sertifika||0), 0);
+  const puanlar = DATA.filter(d => d.puan != null).map(d => d.puan);
+  const avgPuan = puanlar.reduce((a,b)=>a+b,0) / puanlar.length;
+  const gunToplam = DATA.reduce((s,d) => s + (d.gun||0), 0);
+
+  const kpis = [
+    { icon:'book', gold:false, label:'Toplam Eğitim', value: fmt(total), unit:'', foot: (total-yeni)+' planlı · '+yeni+' yeni eklenen' },
+    { icon:'spark', gold:true, label:'Yeni Eğitim', value: fmt(yeni), unit:'', foot: Math.round(yeni/total*100)+'% toplam içinde' },
+    { icon:'users', gold:false, label:'Toplam Katılımcı', value: fmt(katilan), unit:'kişi', foot: fmt(Math.round(katilan/total))+' ort. / eğitim' },
+    { icon:'cert', gold:false, label:'Toplam Sertifika', value: fmt(sertifika), unit:'adet', foot: 'Katılımcı başı 1 sertifika' },
+    { icon:'star', gold:true, label:'Ort. Değerlendirme', value: avgPuan.toFixed(2), unit:'/ 5', foot: puanlar.length+' eğitimde anket verisi var' },
+    { icon:'clock', gold:false, label:'Toplam Eğitim Günü', value: fmt(gunToplam), unit:'gün', foot: (gunToplam/total).toFixed(1)+' gün ort. süre' },
+  ];
+  const row = document.getElementById('kpiRow');
+  row.innerHTML = kpis.map(k => `
+    <div class="kpi-tile">
+      <div class="kpi-top">
+        <div class="kpi-label">${k.label}</div>
+        <div class="kpi-icon ${k.gold?'gold':''}">${ICONS[k.icon]}</div>
+      </div>
+      <div class="kpi-value">${k.value}<span class="unit">${k.unit}</span></div>
+      <div class="kpi-foot">${k.foot}</div>
+    </div>`).join('');
+})();
+
+// ---------- Monthly column charts ----------
+function monthlyAgg(){
+  const m = {};
+  MONTHS.forEach(name => m[name] = {egitim:0, katilan:0});
+  DATA.forEach(d => {
+    const name = MONTHS[d.ay-1];
+    if (!name) return;
+    m[name].egitim += 1;
+    m[name].katilan += (d.katilan||0);
+  });
+  return m;
+}
+function renderColumnChart(containerId, agg, key){
+  const el = document.getElementById(containerId);
+  const max = Math.max(...MONTHS.map(m => agg[m][key]), 1);
+  el.innerHTML = MONTHS.map(name => {
+    const val = agg[name][key];
+    const h = Math.max((val/max)*100, val>0?4:0);
+    return `<div class="col-item" title="${name}: ${fmt(val)}">
+      <div class="col-value">${val>0?fmt(val):''}</div>
+      <div class="col-bar" style="height:${h}%;"></div>
+      <div class="col-label">${name}</div>
+    </div>`;
+  }).join('');
+}
+const agg = monthlyAgg();
+renderColumnChart('chartMonthlyCount', agg, 'egitim');
+renderColumnChart('chartMonthlyPart', agg, 'katilan');
+
+// ---------- Tip / Durum comparisons ----------
+function groupBy(key){
+  const out = {};
+  DATA.forEach(d => {
+    const k = d[key];
+    out[k] = out[k] || {egitim:0, katilan:0};
+    out[k].egitim += 1;
+    out[k].katilan += (d.katilan||0);
+  });
+  return out;
+}
+function renderLegend(containerId, items){
+  document.getElementById(containerId).innerHTML = items.map(i =>
+    `<div class="legend-item"><span class="legend-dot" style="background:${i.color}"></span>${i.label}</div>`
+  ).join('');
+}
+function renderCmp(containerId, rows, key, colorMap){
+  const max = Math.max(...rows.map(r => r[key]), 1);
+  document.getElementById(containerId).innerHTML = rows.map(r => {
+    const pct = Math.max((r[key]/max)*100, 3);
+    return `<div class="cmp-row">
+      <div class="cmp-label">${r.label}</div>
+      <div class="cmp-track"><div class="cmp-fill" style="width:${pct}%; background:${colorMap[r.label]};"></div></div>
+      <div class="cmp-val">${fmt(r[key])}</div>
+    </div>`;
+  }).join('');
+}
+
+const tipAgg = groupBy('tip');
+const tipRows = [
+  { label:'ÇEVRİM İÇİ', egitim: tipAgg['ÇEVRİM İÇİ'].egitim, katilan: tipAgg['ÇEVRİM İÇİ'].katilan },
+  { label:'SINIF İÇİ', egitim: tipAgg['SINIF İÇİ'].egitim, katilan: tipAgg['SINIF İÇİ'].katilan },
+];
+const tipColors = { 'ÇEVRİM İÇİ': token('--navy-700'), 'SINIF İÇİ': token('--gold-600') };
+renderLegend('legendTip', [{label:'Çevrim İçi', color:token('--navy-700')},{label:'Sınıf İçi', color:token('--gold-600')}]);
+renderCmp('cmpTipCount', tipRows, 'egitim', tipColors);
+
+const durumAgg = groupBy('durum');
+const durumRows = [
+  { label:'PLANLI', egitim: durumAgg['PLANLI'].egitim, katilan: durumAgg['PLANLI'].katilan },
+  { label:'YENİ', egitim: durumAgg['YENİ'].egitim, katilan: durumAgg['YENİ'].katilan },
+];
+const durumColors = { 'PLANLI': token('--navy-700'), 'YENİ': token('--gold-600') };
+renderLegend('legendDurum', [{label:'Planlı', color:token('--navy-700')},{label:'Yeni', color:token('--gold-600')}]);
+renderCmp('cmpDurumCount', durumRows, 'egitim', durumColors);
+
+// ---------- Top 10 katılım ----------
+(function(){
+  const top10 = [...DATA].sort((a,b)=> (b.katilan||0)-(a.katilan||0)).slice(0,10);
+  const max = Math.max(...top10.map(d=>d.katilan||0), 1);
+  document.getElementById('chartTop10').innerHTML = top10.map(d => {
+    const pct = Math.max((d.katilan/max)*100, 3);
+    const shortName = d.ad.split('\n')[0];
+    return `<div class="hbar-row" title="${shortName.replace(/"/g,'&quot;')}">
+      <div class="hbar-name">${shortName}</div>
+      <div class="hbar-track"><div class="hbar-fill" style="width:${pct}%;"></div></div>
+      <div class="hbar-val">${fmt(d.katilan)}</div>
+    </div>`;
+  }).join('');
+})();
+
+// ---------- Table ----------
+let sortKey = null, sortDir = 1;
+function renderTable(filterText){
+  const q = (filterText||'').toLocaleLowerCase('tr-TR');
+  let rows = DATA.filter(d => {
+    if (!q) return true;
+    const hay = [d.durum, d.ad, d.tarih, d.tip].join(' ').toLocaleLowerCase('tr-TR');
+    return hay.includes(q);
+  });
+  if (sortKey) {
+    rows = [...rows].sort((a,b) => {
+      let av = a[sortKey], bv = b[sortKey];
+      if (av == null) av = (typeof bv === 'number') ? -Infinity : '';
+      if (bv == null) bv = (typeof av === 'number') ? -Infinity : '';
+      if (typeof av === 'string') return av.localeCompare(bv, 'tr-TR') * sortDir;
+      return (av - bv) * sortDir;
+    });
+  }
+  document.getElementById('resultCount').textContent = rows.length + ' / ' + DATA.length + ' eğitim';
+  document.getElementById('tableBody').innerHTML = rows.map(d => {
+    const durumBadge = d.durum === 'YENİ'
+      ? '<span class="badge badge-yeni">Yeni</span>'
+      : '<span class="badge badge-planli">Planlı</span>';
+    const tipBadge = d.tip === 'ÇEVRİM İÇİ'
+      ? '<span class="badge-tip badge-online">Çevrim İçi</span>'
+      : '<span class="badge-tip badge-sinif">Sınıf İçi</span>';
+    const shortName = d.ad.split('\n')[0];
+    return `<tr>
+      <td>${durumBadge}</td>
+      <td class="name-cell">${shortName}</td>
+      <td>${d.tarih}</td>
+      <td>${tipBadge}</td>
+      <td class="num">${d.gun ?? '—'}</td>
+      <td class="num">${d.puan != null ? d.puan.toFixed(2) : '—'}</td>
+      <td class="num">${fmt(d.katilan||0)}</td>
+      <td class="num">${fmt(d.sertifika||0)}</td>
+    </tr>`;
+  }).join('');
+}
+renderTable('');
+document.getElementById('searchInput').addEventListener('input', e => renderTable(e.target.value));
+document.getElementById('pdfBtn').addEventListener('click', () => generatePDF(DATA));
+document.querySelectorAll('#dataTable thead th').forEach(th => {
+  th.addEventListener('click', () => {
+    const key = th.dataset.key;
+    if (sortKey === key) sortDir *= -1; else { sortKey = key; sortDir = 1; }
+    document.querySelectorAll('#dataTable thead th .arrow').forEach(a => a.remove());
+    th.innerHTML += `<span class="arrow">${sortDir===1?'▲':'▼'}</span>`;
+    renderTable(document.getElementById('searchInput').value);
+  });
+});
+
+} // end renderDashboard
+
+// ---------- PDF export (vector, crisp — no screenshot/rasterization) ----------
+function generatePDF(DATA){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const pageW = 210, marginX = 14;
+  const wine = [117,29,64], raspberry = [155,36,84], gray = [154,154,154], ink = [36,17,25];
+  let y = 0;
+
+  const total = DATA.length;
+  const yeni = DATA.filter(d => d.durum === 'YENİ').length;
+  const katilan = DATA.reduce((s,d) => s + (d.katilan||0), 0);
+  const sertifika = DATA.reduce((s,d) => s + (d.sertifika||0), 0);
+  const puanlar = DATA.filter(d => d.puan != null).map(d => d.puan);
+  const avgPuan = puanlar.length ? puanlar.reduce((a,b)=>a+b,0) / puanlar.length : 0;
+  const gunToplam = DATA.reduce((s,d) => s + (d.gun||0), 0);
+
+  // Header band
+  doc.setFillColor(...wine);
+  doc.rect(0, 0, pageW, 28, 'F');
+  doc.setTextColor(255,255,255);
+  doc.setFont('helvetica','bold'); doc.setFontSize(15);
+  doc.text('TürkÇimento Akademi', marginX, 12);
+  doc.setFontSize(11);
+  doc.text('Eğitim Dashboard', marginX, 19);
+  doc.setFont('helvetica','normal'); doc.setFontSize(8.5);
+  doc.text('Ocak – Temmuz 2026 dönemi eğitim faaliyetleri raporu', marginX, 24.5);
+  doc.setFontSize(8);
+  doc.text(new Date().toLocaleDateString('tr-TR'), pageW - marginX, 12, { align: 'right' });
+  y = 36;
+
+  // KPI grid (3 x 2)
+  const kpis = [
+    ['Toplam Eğitim', fmt(total)],
+    ['Yeni Eğitim', fmt(yeni)],
+    ['Toplam Katılımcı', fmt(katilan)],
+    ['Toplam Sertifika', fmt(sertifika)],
+    ['Ort. Değerlendirme', avgPuan.toFixed(2) + ' / 5'],
+    ['Toplam Eğitim Günü', fmt(gunToplam)],
+  ];
+  const kpiW = (pageW - marginX*2 - 2*5) / 3, kpiH = 20;
+  kpis.forEach((k, i) => {
+    const col = i % 3, row = Math.floor(i / 3);
+    const x = marginX + col * (kpiW + 5);
+    const yy = y + row * (kpiH + 5);
+    doc.setDrawColor(...gray); doc.setFillColor(247,246,246);
+    doc.roundedRect(x, yy, kpiW, kpiH, 1.5, 1.5, 'FD');
+    doc.setTextColor(...gray); doc.setFont('helvetica','normal'); doc.setFontSize(7.5);
+    doc.text(k[0], x + 4, yy + 6);
+    doc.setTextColor(...wine); doc.setFont('helvetica','bold'); doc.setFontSize(13);
+    doc.text(String(k[1]), x + 4, yy + 15);
+  });
+  y += 2*(kpiH+5) + 6;
+
+  // Monthly bar chart (Eğitim Sayısı)
+  const monthAgg = {}; MONTHS.forEach(m => monthAgg[m] = {egitim:0, katilan:0});
+  DATA.forEach(d => { const m = MONTHS[d.ay-1]; if (m) { monthAgg[m].egitim++; monthAgg[m].katilan += (d.katilan||0); } });
+
+  function drawBarChart(title, key, startY, color){
+    doc.setTextColor(...ink); doc.setFont('helvetica','bold'); doc.setFontSize(9.5);
+    doc.text(title, marginX, startY);
+    const chartTop = startY + 4, chartH = 26, chartW = pageW - marginX*2;
+    const barW = chartW / MONTHS.length;
+    const max = Math.max(...MONTHS.map(m => monthAgg[m][key]), 1);
+    MONTHS.forEach((m, i) => {
+      const val = monthAgg[m][key];
+      const h = (val / max) * chartH;
+      const x = marginX + i * barW + barW*0.18;
+      const w = barW * 0.64;
+      doc.setFillColor(...color);
+      doc.rect(x, chartTop + chartH - h, w, h, 'F');
+      doc.setFontSize(7); doc.setTextColor(...ink); doc.setFont('helvetica','bold');
+      doc.text(fmt(val), x + w/2, chartTop + chartH - h - 1.5, { align: 'center' });
+      doc.setFontSize(7); doc.setTextColor(...gray); doc.setFont('helvetica','normal');
+      doc.text(m, x + w/2, chartTop + chartH + 4, { align: 'center' });
+    });
+    return chartTop + chartH + 8;
+  }
+  y = drawBarChart('Aylık Eğitim Sayısı', 'egitim', y, wine);
+  y = drawBarChart('Aylık Katılımcı Sayısı', 'katilan', y + 2, wine);
+
+  // Tip / Durum comparison bars
+  function groupBy(key){
+    const out = {};
+    DATA.forEach(d => { const k = d[key]; out[k] = out[k] || {egitim:0}; out[k].egitim += 1; });
+    return out;
+  }
+  function drawCompareRow(label, value, x, w, rowY, max, color){
+    doc.setFontSize(7.5); doc.setTextColor(...ink); doc.setFont('helvetica','normal');
+    doc.text(label, x, rowY + 3.2);
+    const trackX = x + 24, trackW = w - 24 - 10;
+    doc.setFillColor(241,238,239);
+    doc.rect(trackX, rowY, trackW, 4.2, 'F');
+    doc.setFillColor(...color);
+    doc.rect(trackX, rowY, Math.max((value/max)*trackW, 2), 4.2, 'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(7.5);
+    doc.text(String(value), x + w - 6, rowY + 3.2, { align: 'right' });
+  }
+  const tipAgg = groupBy('tip'), durumAgg = groupBy('durum');
+  const halfW = (pageW - marginX*2 - 8) / 2;
+  doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(...ink);
+  doc.text('Eğitim Tipi', marginX, y + 4);
+  doc.text('Eğitim Durumu', marginX + halfW + 8, y + 4);
+  const tipMax = Math.max(tipAgg['ÇEVRİM İÇİ']?.egitim||0, tipAgg['SINIF İÇİ']?.egitim||0, 1);
+  const durumMax = Math.max(durumAgg['PLANLI']?.egitim||0, durumAgg['YENİ']?.egitim||0, 1);
+  drawCompareRow('Çevrim İçi', tipAgg['ÇEVRİM İÇİ']?.egitim||0, marginX, halfW, y + 8, tipMax, wine);
+  drawCompareRow('Sınıf İçi', tipAgg['SINIF İÇİ']?.egitim||0, marginX, halfW, y + 14, tipMax, raspberry);
+  drawCompareRow('Planlı', durumAgg['PLANLI']?.egitim||0, marginX + halfW + 8, halfW, y + 8, durumMax, wine);
+  drawCompareRow('Yeni', durumAgg['YENİ']?.egitim||0, marginX + halfW + 8, halfW, y + 14, durumMax, raspberry);
+
+  // Detail table (new page)
+  doc.addPage();
+  doc.autoTable({
+    head: [['Durum','Eğitim Adı','Tarih','Tip','Gün','Puan','Katılan','Sertifika']],
+    body: DATA.map(d => [
+      d.durum === 'YENİ' ? 'Yeni' : 'Planlı',
+      d.ad.split('\n')[0],
+      d.tarih,
+      d.tip === 'ÇEVRİM İÇİ' ? 'Çevrim İçi' : 'Sınıf İçi',
+      d.gun ?? '—',
+      d.puan != null ? d.puan.toFixed(2) : '—',
+      fmt(d.katilan||0),
+      fmt(d.sertifika||0),
+    ]),
+    startY: 14,
+    margin: { left: marginX, right: marginX },
+    styles: { font: 'helvetica', fontSize: 7.5, textColor: ink, lineColor: [217,217,217], lineWidth: 0.1 },
+    headStyles: { fillColor: wine, textColor: 255, fontStyle: 'bold' },
+    alternateRowStyles: { fillColor: [247,246,246] },
+    columnStyles: { 1: { cellWidth: 58 } },
+  });
+
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let p = 1; p <= pageCount; p++) {
+    doc.setPage(p);
+    doc.setFontSize(7.5); doc.setTextColor(...gray); doc.setFont('helvetica','normal');
+    doc.text('TürkÇimento Akademi · Eğitim Dashboard', marginX, 292);
+    doc.text(`${p} / ${pageCount}`, pageW - marginX, 292, { align: 'right' });
+  }
+
+  doc.save('turkcimento-akademi-egitim-dashboard.pdf');
+}
+
+// ---------- Load live data straight from the published Google Sheet ----------
+// Google's published-CSV endpoint sends Access-Control-Allow-Origin: *, so a
+// plain browser fetch works with zero server-side code — no Worker/Function needed.
+const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTKMMPaxGqCy2_kT2Yc2mNp1LSd6p8vWzoatLsa0klVWC3DMi3_c3X7Pcmje2UhQfqNZdgTqB6Ov9og/pub?gid=1649573246&single=true&output=csv";
+
+const TR_MONTHS = {
+  ocak:1, şubat:2, subat:2, mart:3, nisan:4, mayıs:5, mayis:5,
+  haziran:6, temmuz:7, ağustos:8, agustos:8, eylül:9, eylul:9,
+  ekim:10, kasım:11, kasim:11, aralık:12, aralik:12,
+};
+
+function parseCSV(text){
+  const rows = [];
+  let row = [], field = '', inQuotes = false;
+  for (let i = 0; i < text.length; i++){
+    const c = text[i], next = text[i+1];
+    if (inQuotes){
+      if (c === '"' && next === '"'){ field += '"'; i++; }
+      else if (c === '"'){ inQuotes = false; }
+      else { field += c; }
+    } else {
+      if (c === '"') inQuotes = true;
+      else if (c === ','){ row.push(field); field = ''; }
+      else if (c === '\r'){ /* skip */ }
+      else if (c === '\n'){ row.push(field); rows.push(row); row = []; field = ''; }
+      else { field += c; }
+    }
+  }
+  if (field.length || row.length){ row.push(field); rows.push(row); }
+  return rows;
+}
+function csvToInt(s){ s = (s||'').trim(); return s ? parseInt(s,10) : null; }
+function csvToFloat(s){ s = (s||'').trim().replace(',', '.'); return s ? parseFloat(s) : null; }
+function csvGetMonth(tarih){
+  const t = tarih.toLocaleLowerCase('tr-TR');
+  for (const name in TR_MONTHS){ if (t.includes(name)) return TR_MONTHS[name]; }
+  const m = tarih.match(/^(\d+)\/(\d+)\/(\d+)/);
+  return m ? parseInt(m[1],10) : null;
+}
+function rowsToData(rows){
+  return rows.slice(1)
+    .filter(r => r.length > 5 && (r[0]||'').trim())
+    .map(r => {
+      const tarih = (r[3]||'').trim();
+      return {
+        durum: (r[0]||'').trim(),
+        ad: (r[1]||'').split('\n')[0].trim(),
+        gun: csvToInt(r[2]),
+        tarih,
+        ay: csvGetMonth(tarih),
+        tip: (r[4]||'').trim(),
+        puan: csvToFloat(r[5]),
+        anket: csvToInt(r[6]),
+        beklenen: csvToInt(r[7]),
+        katilan: csvToInt(r[8]),
+        sertifika: csvToInt(r[9]),
+      };
+    });
+}
+
+async function init(){
+  try {
+    const res = await fetch(SHEET_CSV_URL);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    const DATA = rowsToData(parseCSV(text));
+    if (!DATA.length) throw new Error('empty');
+    renderDashboard(DATA);
+  } catch (err) {
+    console.error('Veri yüklenemedi:', err);
+    document.getElementById('kpiRow').innerHTML =
+      '<div style="grid-column:1/-1;padding:22px;text-align:center;color:var(--warn);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);">' +
+      'Veri yüklenemedi. İnternet bağlantınızı kontrol edip sayfayı yenileyin.</div>';
+  }
+}
+init();
+</script>
