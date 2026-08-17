@@ -310,7 +310,7 @@
     <div class="hero-title-row">
       <div>
         <h1>TÜRKÇİMENTO AKADEMİ</h1>
-        <p class="hero-sub">Ocak – Temmuz 2026 döneminde gerçekleştirilen 46 eğitim faaliyetinin katılım, sertifika ve değerlendirme verileri.</p>
+        <p class="hero-sub">Ocak – Temmuz 2026 Eğitim Verileri</p>
       </div>
     </div>
   </div>
@@ -609,15 +609,27 @@ async function generatePDF(){
 
   try {
     const scale = Math.min(2, (window.devicePixelRatio || 1) + 0.5);
+    let breakPointsCss = [];
     const canvas = await html2canvas(document.body, {
       scale,
       backgroundColor: getComputedStyle(document.body).backgroundColor || '#ececec',
       useCORS: true,
       onclone: (clonedDoc) => {
         clonedDoc.getElementById('pdfBtn')?.remove();
-        const search = clonedDoc.getElementById('searchInput');
-        if (search) search.style.visibility = 'hidden';
+        clonedDoc.querySelector('.table-controls')?.remove();
+        clonedDoc.getElementById('resultCount')?.remove();
         clonedDoc.querySelectorAll('#dataTable thead th .arrow').forEach(a => a.remove());
+
+        // collect safe cut lines (top/bottom edges of cards, sections, table rows)
+        // so page breaks never slice through the middle of one of these.
+        const pts = new Set();
+        clonedDoc.querySelectorAll('section, .card, .kpi-tile, .hero, #dataTable tbody tr')
+          .forEach(el => {
+            const r = el.getBoundingClientRect();
+            pts.add(Math.round(r.top));
+            pts.add(Math.round(r.bottom));
+          });
+        breakPointsCss = [...pts].sort((a, b) => a - b);
       },
     });
 
@@ -625,18 +637,39 @@ async function generatePDF(){
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pageW = 210, pageH = 297;
     const imgW = pageW;
-    const imgH = (canvas.height * imgW) / canvas.width;
-    const imgData = canvas.toDataURL('image/jpeg', 0.92);
+    const pxPerMm = canvas.width / imgW;
+    const targetPageH = pageH * pxPerMm;
+    const breakPointsPx = breakPointsCss
+      .map(v => v * scale)
+      .filter(v => v >= 0 && v <= canvas.height);
 
-    let heightLeft = imgH;
-    let y = 0;
-    pdf.addImage(imgData, 'JPEG', 0, y, imgW, imgH);
-    heightLeft -= pageH;
-    while (heightLeft > 0) {
-      y = heightLeft - imgH;
-      pdf.addPage();
-      pdf.addImage(imgData, 'JPEG', 0, y, imgW, imgH);
-      heightLeft -= pageH;
+    let cursor = 0;
+    let first = true;
+    while (cursor < canvas.height - 1) {
+      const idealEnd = cursor + targetPageH;
+      let cut = idealEnd >= canvas.height ? canvas.height : null;
+      if (cut === null) {
+        for (const bp of breakPointsPx) {
+          if (bp > cursor + targetPageH * 0.4 && bp <= idealEnd) cut = bp;
+        }
+        if (cut === null) cut = idealEnd;
+      }
+      const sliceH = Math.round(cut - cursor);
+      if (sliceH <= 0) break;
+
+      const pageCanvas = document.createElement('canvas');
+      pageCanvas.width = canvas.width;
+      pageCanvas.height = sliceH;
+      pageCanvas.getContext('2d').drawImage(
+        canvas, 0, cursor, canvas.width, sliceH, 0, 0, canvas.width, sliceH
+      );
+      const sliceData = pageCanvas.toDataURL('image/jpeg', 0.92);
+      const sliceImgH = sliceH / pxPerMm;
+
+      if (!first) pdf.addPage();
+      pdf.addImage(sliceData, 'JPEG', 0, 0, imgW, sliceImgH);
+      first = false;
+      cursor = cut;
     }
 
     pdf.save('turkcimento-akademi-egitim-dashboard.pdf');
