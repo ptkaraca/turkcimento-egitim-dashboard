@@ -174,7 +174,7 @@
   }
   .col-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 6px; position: relative; }
   .col-value { font-size: 11.5px; color: var(--navy-800); font-variant-numeric: tabular-nums; font-weight: 700; }
-  .col-bar { width: 100%; max-width: 32px; border-radius: 7px 7px 0 0; background: linear-gradient(180deg, var(--gray-500), var(--gray-700)); transition: opacity .12s, transform .12s; cursor: default; }
+  .col-bar { width: 100%; max-width: 32px; border-radius: 7px 7px 0 0; background: linear-gradient(180deg, var(--navy-500), var(--navy-700)); transition: opacity .12s, transform .12s; cursor: default; }
   .col-item:hover .col-bar { opacity: 0.88; transform: scaleY(1.01); }
   .col-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; height: 28px; display:flex; align-items:flex-start; justify-content:center; font-weight: 550; }
 
@@ -462,12 +462,9 @@ function renderColumnChart(containerId, agg, key){
   el.innerHTML = MONTHS.map((name, i) => {
     const val = agg[name][key];
     const h = Math.max((val/max)*100, val>0?4:0);
-    const fill = i % 2 === 0
-      ? 'linear-gradient(180deg, var(--navy-500), var(--navy-700))'
-      : 'linear-gradient(180deg, var(--gray-500), var(--gray-700))';
     return `<div class="col-item" title="${name}: ${fmt(val)}">
       <div class="col-value">${val>0?fmt(val):''}</div>
-      <div class="col-bar" style="height:${h}%; background:${fill};"></div>
+      <div class="col-bar" style="height:${h}%;"></div>
       <div class="col-label">${name}</div>
     </div>`;
   }).join('');
@@ -510,8 +507,8 @@ const tipRows = [
   { label:'ÇEVRİM İÇİ', egitim: tipAgg['ÇEVRİM İÇİ'].egitim, katilan: tipAgg['ÇEVRİM İÇİ'].katilan },
   { label:'SINIF İÇİ', egitim: tipAgg['SINIF İÇİ'].egitim, katilan: tipAgg['SINIF İÇİ'].katilan },
 ];
-const tipColors = { 'ÇEVRİM İÇİ': token('--navy-700'), 'SINIF İÇİ': token('--gold-600') };
-renderLegend('legendTip', [{label:'Çevrim İçi', color:token('--navy-700')},{label:'Sınıf İçi', color:token('--gold-600')}]);
+const tipColors = { 'ÇEVRİM İÇİ': token('--navy-700'), 'SINIF İÇİ': token('--gray-700') };
+renderLegend('legendTip', [{label:'Çevrim İçi', color:token('--navy-700')},{label:'Sınıf İçi', color:token('--gray-700')}]);
 renderCmp('cmpTipCount', tipRows, 'egitim', tipColors);
 
 const durumAgg = groupBy('durum');
@@ -519,8 +516,8 @@ const durumRows = [
   { label:'PLANLI', displayLabel:'2026 Takvimde Yer Alan Eğitim Sayısı', egitim: durumAgg['PLANLI'].egitim, katilan: durumAgg['PLANLI'].katilan },
   { label:'YENİ', displayLabel:'2026 Yeni Açılan Eğitim Sayısı', egitim: durumAgg['YENİ'].egitim, katilan: durumAgg['YENİ'].katilan },
 ];
-const durumColors = { 'PLANLI': token('--navy-700'), 'YENİ': token('--gold-600') };
-renderLegend('legendDurum', [{label:'2026 Takvimde Yer Alan', color:token('--navy-700')},{label:'2026 Yeni Açılan', color:token('--gold-600')}]);
+const durumColors = { 'PLANLI': token('--navy-700'), 'YENİ': token('--gray-700') };
+renderLegend('legendDurum', [{label:'2026 Takvimde Yer Alan', color:token('--navy-700')},{label:'2026 Yeni Açılan', color:token('--gray-700')}]);
 renderCmp('cmpDurumCount', durumRows, 'egitim', durumColors, true);
 
 // ---------- Top 10 katılım ----------
@@ -694,7 +691,7 @@ function generatePDF(DATA){
       const h = (val / axisMax) * chartH;
       const x = chartLeft + i * barW + barW*0.18;
       const w = barW * 0.64;
-      doc.setFillColor(...(i % 2 === 0 ? wine : graybar));
+      doc.setFillColor(...color);
       doc.rect(x, chartTop + chartH - h, w, Math.max(h,0.3), 'F');
       doc.setFontSize(7); doc.setTextColor(...ink); doc.setFont('Roboto','bold');
       doc.text(fmt(val), x + w/2, chartTop + chartH - h - 1.8, { align: 'center' });
@@ -703,8 +700,8 @@ function generatePDF(DATA){
     });
     return chartTop + chartH + 9;
   }
-  y = drawBarChart('Aylık Eğitim Sayısı (Adet)', 'egitim', y, graybar);
-  y = drawBarChart('Aylık Katılımcı Sayısı (Kişi)', 'katilan', y + 2, graybar);
+  y = drawBarChart('Aylık Eğitim Sayısı (Adet)', 'egitim', y, wine);
+  y = drawBarChart('Aylık Katılımcı Sayısı (Kişi)', 'katilan', y + 2, wine);
 
   // Tip / Durum comparison bars
   function groupBy(key){
@@ -742,9 +739,9 @@ function generatePDF(DATA){
   const tipMax = Math.max(tipAgg['ÇEVRİM İÇİ']?.egitim||0, tipAgg['SINIF İÇİ']?.egitim||0, 1);
   const durumMax = Math.max(durumAgg['PLANLI']?.egitim||0, durumAgg['YENİ']?.egitim||0, 1);
   drawCompareRow('Çevrim İçi', tipAgg['ÇEVRİM İÇİ']?.egitim||0, marginX, halfW, y + 8, tipMax, wine);
-  drawCompareRow('Sınıf İçi', tipAgg['SINIF İÇİ']?.egitim||0, marginX, halfW, y + 14, tipMax, raspberry);
+  drawCompareRow('Sınıf İçi', tipAgg['SINIF İÇİ']?.egitim||0, marginX, halfW, y + 14, tipMax, graybar);
   drawCompareRowStacked('2026 Takvimde Yer Alan Eğitim Sayısı', durumAgg['PLANLI']?.egitim||0, marginX + halfW + 8, halfW, y + 7, durumMax, wine);
-  drawCompareRowStacked('2026 Yeni Açılan Eğitim Sayısı', durumAgg['YENİ']?.egitim||0, marginX + halfW + 8, halfW, y + 17, durumMax, raspberry);
+  drawCompareRowStacked('2026 Yeni Açılan Eğitim Sayısı', durumAgg['YENİ']?.egitim||0, marginX + halfW + 8, halfW, y + 17, durumMax, graybar);
 
   // Detail table (new page)
   doc.addPage();
