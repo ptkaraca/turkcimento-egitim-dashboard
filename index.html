@@ -638,25 +638,51 @@ function generatePDF(DATA){
   const monthAgg = {}; MONTHS.forEach(m => monthAgg[m] = {egitim:0, katilan:0});
   DATA.forEach(d => { const m = MONTHS[d.ay-1]; if (m) { monthAgg[m].egitim++; monthAgg[m].katilan += (d.katilan||0); } });
 
+  function niceMax(v){
+    if (v <= 0) return 1;
+    const pow = Math.pow(10, Math.floor(Math.log10(v)));
+    const norm = v / pow;
+    let niceNorm;
+    if (norm <= 1) niceNorm = 1;
+    else if (norm <= 2) niceNorm = 2;
+    else if (norm <= 5) niceNorm = 5;
+    else niceNorm = 10;
+    return niceNorm * pow;
+  }
+
   function drawBarChart(title, key, startY, color){
     doc.setTextColor(...ink); doc.setFont('Roboto','bold'); doc.setFontSize(9.5);
     doc.text(title, marginX, startY);
-    const chartTop = startY + 4, chartH = 26, chartW = pageW - marginX*2;
+    const axisW = 11;
+    const chartTop = startY + 5, chartH = 28;
+    const chartLeft = marginX + axisW, chartW = pageW - marginX*2 - axisW;
     const barW = chartW / MONTHS.length;
-    const max = Math.max(...MONTHS.map(m => monthAgg[m][key]), 1);
+    const rawMax = Math.max(...MONTHS.map(m => monthAgg[m][key]), 1);
+    const axisMax = niceMax(rawMax);
+
+    // gridlines with axis value labels (0 / half / max)
+    [0, 0.5, 1].forEach(frac => {
+      const gy = chartTop + chartH - frac * chartH;
+      doc.setDrawColor(...(frac === 0 ? ink : [225,222,223]));
+      doc.setLineWidth(frac === 0 ? 0.25 : 0.15);
+      doc.line(chartLeft, gy, chartLeft + chartW, gy);
+      doc.setFontSize(6); doc.setTextColor(...gray); doc.setFont('Roboto','normal');
+      doc.text(fmt(Math.round(axisMax * frac)), chartLeft - 2, gy + 1, { align: 'right' });
+    });
+
     MONTHS.forEach((m, i) => {
       const val = monthAgg[m][key];
-      const h = (val / max) * chartH;
-      const x = marginX + i * barW + barW*0.18;
+      const h = (val / axisMax) * chartH;
+      const x = chartLeft + i * barW + barW*0.18;
       const w = barW * 0.64;
       doc.setFillColor(...color);
-      doc.rect(x, chartTop + chartH - h, w, h, 'F');
+      doc.rect(x, chartTop + chartH - h, w, Math.max(h,0.3), 'F');
       doc.setFontSize(7); doc.setTextColor(...ink); doc.setFont('Roboto','bold');
-      doc.text(fmt(val), x + w/2, chartTop + chartH - h - 1.5, { align: 'center' });
+      doc.text(fmt(val), x + w/2, chartTop + chartH - h - 1.8, { align: 'center' });
       doc.setFontSize(7); doc.setTextColor(...gray); doc.setFont('Roboto','normal');
-      doc.text(m, x + w/2, chartTop + chartH + 4, { align: 'center' });
+      doc.text(m, x + w/2, chartTop + chartH + 4.5, { align: 'center' });
     });
-    return chartTop + chartH + 8;
+    return chartTop + chartH + 9;
   }
   y = drawBarChart('Aylık Eğitim Sayısı', 'egitim', y, wine);
   y = drawBarChart('Aylık Katılımcı Sayısı', 'katilan', y + 2, wine);
