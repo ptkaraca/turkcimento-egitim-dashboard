@@ -609,9 +609,11 @@ async function generatePDF(){
 
   try {
     const scale = Math.min(2, (window.devicePixelRatio || 1) + 0.5);
+
     let breakPointsCss = [];
     let tableSectionTopCss = null;
-    const canvas = await html2canvas(document.body, {
+    let contentBottomCss = null;
+    let rawCanvas = await html2canvas(document.body, {
       scale,
       backgroundColor: getComputedStyle(document.body).backgroundColor || '#ececec',
       useCORS: true,
@@ -621,32 +623,97 @@ async function generatePDF(){
         clonedDoc.getElementById('resultCount')?.remove();
         clonedDoc.querySelectorAll('#dataTable thead th .arrow').forEach(a => a.remove());
 
-        // tighten the table just for the PDF export so the full list fits in fewer
-        // pages — the on-screen table is untouched.
+        // ---- Dynamic layout fit, measured entirely inside the clone that gets
+        // rasterized (not the live page) so there's no live-vs-clone mismatch.
+        // Figures out, for THIS window's current width, how much page-1 content
+        // is short of a full page, and how much the table needs to shrink to
+        // fit page 2 together with the footer — no hardcoded pixel guesses.
+        const bodyWidthCss = clonedDoc.body.scrollWidth;
+        const pageH_css = 297 * bodyWidthCss / 210;
+        const tableSection = clonedDoc.getElementById('dataTable').closest('section');
+        const wrapSections = [...clonedDoc.querySelectorAll('.wrap > section')];
+        const tableIdx = wrapSections.indexOf(tableSection);
+        const naturalTableTop = tableSection.getBoundingClientRect().top;
+        const theadEl = clonedDoc.querySelector('#dataTable thead');
+        const rows = [...clonedDoc.querySelectorAll('#dataTable tbody tr')];
+        const footerEl = clonedDoc.querySelector('.page-foot');
+        const naturalTheadH = theadEl.getBoundingClientRect().height;
+        const naturalRowsTotalH = rows.length
+          ? rows[rows.length - 1].getBoundingClientRect().bottom - rows[0].getBoundingClientRect().top
+          : 0;
+        const naturalFooterH = footerEl ? footerEl.getBoundingClientRect().height : 0;
+        const wrapGapCurrent = parseFloat(getComputedStyle(clonedDoc.querySelector('.wrap')).rowGap) || 28;
+
+        // stretch page-1's inter-section spacing so it ends close to (not past)
+        // a full page, leaving a small safety margin instead of a big gap.
+        const targetFill = pageH_css * 0.97;
+        const shortfall = targetFill - naturalTableTop;
+        const extraGapPerGap = (shortfall > 0 && tableIdx > 0) ? shortfall / tableIdx : 0;
+        let newWrapGap = Math.round(wrapGapCurrent + extraGapPerGap);
+
+        // shrink the table just enough that header + all rows + footer fit on
+        // the one page the table starts on — never more than needed.
+        const gapBeforeFooter = wrapGapCurrent + extraGapPerGap;
+        const neededHeight = naturalTheadH + naturalRowsTotalH + gapBeforeFooter + naturalFooterH;
+        const overflow = neededHeight - pageH_css;
+        const perRowReduction = (overflow > 0 && rows.length > 0)
+          ? Math.ceil(overflow / rows.length) + 2
+          : 0;
+        let newRowPadV = Math.max(3, 10 - Math.ceil(perRowReduction / 2));
+        let newHeadPadV = Math.max(4, 11 - Math.ceil(perRowReduction / 2));
+
         const style = clonedDoc.createElement('style');
-        style.textContent = `
-          #dataTable thead th { padding: 6px 12px !important; }
-          #dataTable tbody td { padding: 5px 12px !important; }
-          .wrap { gap: 58px !important; }
-        `;
         clonedDoc.head.appendChild(style);
+        const applyStyle = () => {
+          style.textContent = `
+            #dataTable thead th { padding: ${newHeadPadV}px 12px !important; }
+            #dataTable tbody td { padding: ${newRowPadV}px 12px !important; }
+            .wrap { gap: ${newWrapGap}px !important; }
+          `;
+        };
+        applyStyle();
+
+        // verify against the clone's own re-measured layout; nudge tighter if
+        // the footer still doesn't fit on the table's page.
+        for (let i = 0; i < 5; i++) {
+          const tTop = tableSection.getBoundingClientRect().top;
+          const fBottom = footerEl ? footerEl.getBoundingClientRect().bottom : tTop;
+          if (fBottom <= tTop + pageH_css) break;
+          newRowPadV = Math.max(2, newRowPadV - 1);
+          newHeadPadV = Math.max(3, newHeadPadV - 1);
+          applyStyle();
+        }
 
         // the "Tüm Eğitimler" table always starts at the top of a fresh page.
-        const tableSection = clonedDoc.getElementById('dataTable')?.closest('section');
-        if (tableSection) tableSectionTopCss = Math.round(tableSection.getBoundingClientRect().top);
+        tableSectionTopCss = Math.round(tableSection.getBoundingClientRect().top);
 
         // collect safe cut lines (top/bottom edges of cards, sections, table rows)
         // so page breaks never slice through the middle of one of these.
         const pts = new Set();
-        clonedDoc.querySelectorAll('section, .card, .kpi-tile, .hero, #dataTable tbody tr')
+        clonedDoc.querySelectorAll('section, .card, .kpi-tile, .hero, .page-foot, #dataTable tbody tr')
           .forEach(el => {
             const r = el.getBoundingClientRect();
             pts.add(Math.round(r.top));
             pts.add(Math.round(r.bottom));
           });
         breakPointsCss = [...pts].sort((a, b) => a - b);
+        contentBottomCss = breakPointsCss.length ? breakPointsCss[breakPointsCss.length - 1] : null;
       },
     });
+
+    // crop away any trailing blank space below the true last element (e.g.
+    // body bottom padding) so it never becomes a near-empty extra page.
+    let canvas = rawCanvas;
+    if (contentBottomCss != null) {
+      const contentBottomPx = Math.min(Math.round(contentBottomCss * scale), rawCanvas.height);
+      if (contentBottomPx > 0 && rawCanvas.height - contentBottomPx > 4) {
+        const cropped = document.createElement('canvas');
+        cropped.width = rawCanvas.width;
+        cropped.height = contentBottomPx;
+        cropped.getContext('2d').drawImage(rawCanvas, 0, 0);
+        canvas = cropped;
+      }
+    }
 
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF('p', 'mm', 'a4');
