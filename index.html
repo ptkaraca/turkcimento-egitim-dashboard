@@ -464,22 +464,24 @@ function monthlyAgg(){
   });
   return m;
 }
-function renderColumnChart(containerId, agg, key){
+const COL_BASELINE = 28;   // must match .col-bar / .col-label bottom in CSS
+const COL_BAR_AREA = 120;  // px available for bar height (170 total - 22 padding-top - 28 baseline)
+function renderColumnChart(containerId, agg, key, fill){
   const el = document.getElementById(containerId);
   const max = Math.max(...MONTHS.map(m => agg[m][key]), 1);
   el.innerHTML = MONTHS.map((name, i) => {
     const val = agg[name][key];
-    const h = Math.max((val/max)*100, val>0?4:0);
+    const h = Math.max((val/max)*COL_BAR_AREA, val>0?4:0);
     return `<div class="col-item" title="${name}: ${fmt(val)}">
-      <div class="col-value">${val>0?fmt(val):''}</div>
-      <div class="col-bar" style="height:${h}%;"></div>
+      <div class="col-value" style="bottom:${COL_BASELINE + h + 4}px;">${val>0?fmt(val):''}</div>
+      <div class="col-bar" style="height:${h}px; ${fill?`background:${fill};`:''}"></div>
       <div class="col-label">${name}</div>
     </div>`;
   }).join('');
 }
 const agg = monthlyAgg();
 renderColumnChart('chartMonthlyCount', agg, 'egitim');
-renderColumnChart('chartMonthlyPart', agg, 'katilan');
+renderColumnChart('chartMonthlyPart', agg, 'katilan', 'linear-gradient(180deg, var(--gray-500), var(--gray-700))');
 
 // ---------- Tip / Durum comparisons ----------
 function groupBy(key){
@@ -707,7 +709,7 @@ function generatePDF(DATA){
     return chartTop + chartH + 9;
   }
   y = drawBarChart('Aylık Eğitim Sayısı (Adet)', 'egitim', y, wine);
-  y = drawBarChart('Aylık Katılımcı Sayısı (Kişi)', 'katilan', y + 2, wine);
+  y = drawBarChart('Aylık Katılımcı Sayısı (Kişi)', 'katilan', y + 2, graybar);
 
   // Tip / Durum comparison bars
   function groupBy(key){
